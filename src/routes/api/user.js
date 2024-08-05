@@ -2,7 +2,6 @@ import { Router } from 'express';
 
 import { announce_request } from '../../util/log.js';
 import { supabase } from '../../supabase.js';
-import * as auth from '../../util/auth.js';
 
 const router = Router();
 
@@ -15,7 +14,7 @@ router.post("/login", async (req, res) => {
         return;
     }
 
-    const { data, error } = await supabase.auth
+    const { error } = await supabase.auth
         .signInWithPassword({ email, password });
 
     if (error) {
@@ -24,13 +23,8 @@ router.post("/login", async (req, res) => {
         return;
     }
 
-    auth.add_session_token(data);
-
-    res
-        .cookie("stratus_token", data.session.access_token, { httpOnly: true })
-        .redirect("/");
-
     announce_request(req, "200: Logged in");
+    res.redirect("/");
 });
 
 router.post("/register", async (req, res) => {
@@ -51,27 +45,12 @@ router.post("/register", async (req, res) => {
         return;
     }
 
-    const { data, error2 } = await supabase.auth
-        .signInWithPassword({ email, password });
-
-    if (error2) {
-        announce_request(req, `500: ${error2.message}`);
-        res.status(500).send(error2.message);
-        return;
-    }
-
-    auth.add_session_token(data);
-
-    res
-        .cookie("stratus_token", data.session.access_token, { httpOnly: true })
-        .redirect("/");
-
     announce_request(req, "200: Registered");
+    res.redirect("/");
 });
 
 router.post("/logout", async (req, res) => {
-    const { error } = await supabase.auth
-        .signOut();
+    const { error } = await supabase.auth.signOut();
 
     if (error) {
         announce_request(req, `500: ${error.message}`);
@@ -79,13 +58,8 @@ router.post("/logout", async (req, res) => {
         return;
     }
 
-    auth.remove_session_token(req.cookies["stratus_token"]);
-
-    res
-        .clearCookie("stratus_token")
-        .redirect("/login");
-
     announce_request(req, "200: Logged out");
+    res.redirect("/login");
 });
 
 export default router;

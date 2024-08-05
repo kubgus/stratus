@@ -1,29 +1,40 @@
 import { Router } from 'express';
 
-import * as auth from '../util/auth.js';
+import { is_user_authenticated } from '../supabase.js';
 
 const router = Router();
 
 import api_router from "./api/index.js";
+import { announce_request } from '../util/log.js';
 router.use("/api", api_router);
 
-router.get("/", (req, res) => {
-    if (auth.is_valid_token(req.cookies.stratus_token)) {
+router.get("/", async (req, res) => {
+    if (await is_user_authenticated()) {
+        announce_request(req, "200: Index");
         res.render("index");
         return;
     }
+    announce_request(req, "Redirecting to login");
     res.redirect("login");
 });
 
-router.get("/health", (req, res) => {
-    res.send("OK");
-});
-
-router.get("/login", (req, res) => {
+router.get("/login", async (req, res) => {
+    if (await is_user_authenticated()) {
+        announce_request(req, "Redirecting to index");
+        res.redirect("/");
+        return;
+    }
+    announce_request(req, "200: Login");
     res.render("login");
 });
 
-router.get("/register", (req, res) => {
+router.get("/register", async (req, res) => {
+    if (await is_user_authenticated()) {
+        announce_request(req, "Redirecting to index");
+        res.redirect("/");
+        return;
+    }
+    announce_request(req, "200: Register");
     res.render("register");
 });
 
