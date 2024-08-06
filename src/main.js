@@ -39,17 +39,41 @@ app.use(function (err, req, res, next) {
 
 // routes
 import router from "./routes/index.js";
+import { supabase } from "./supabase.js";
+import * as forwarding from "./forwarding.js";
 app.use(router);
 app.use("/static", express.static(path.join(dirname, "/static")));
 
 // sockets for the CLI
 io.on("connection", (socket) => {
-    console.log("a user connected");
+    console.log("[SOCKET] Connection established");
+
+    socket.on("token_verify", (data, callback) => {
+        console.log("[SOCKET] Verifying token");
+        supabase.from("subdomains").select().eq("token", data.token).single().then((data) => {
+            if (data.error) {
+                console.log("[SOCKET] Token verification failed");
+                callback({
+                    error: data.error.message
+                });
+            } else {
+                console.log("[SOCKET] Token verified");
+                callback({
+                    data: data.data
+                });
+
+                forwarding.forward_socket(data.data.id, socket);
+                console.log(`[SOCKET] Started forwarding to ${data.data.id}`);
+            }
+        });
+    });
+
     socket.on("disconnect", () => {
-        console.log("user disconnected");
+        console.log("[SOCKET] Disconnected");
     });
 });
 
+// server
 server.listen(port, () => {
     console.log(`listening on *:${port}`);
 });
