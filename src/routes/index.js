@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { is_user_authenticated } from '../supabase.js';
+import _ from 'lodash';
 
 const router = Router();
 
@@ -13,15 +14,19 @@ router.use((req, res, next) => {
         if (socket) {
             const small_req = {
                 method: req.method,
+                url: req.url,
                 headers: req.headers,
-                body: req.body,
-                path: req.path,
                 query: req.query,
-                query_string: "?" + Object.entries(req.query).map(([k, v]) => `${k}=${v}`).join("&"), 
-                protocol: req.protocol
+                body: req.body,
+                params: req.params,
+                protocol: req.protocol,
+                path: req.path,
             };
-            socket.emit("forward_request", { ...small_req }, (r) => {
-                res.send(r);
+            socket.emit("forward_request", { data: small_req }, (r) => {
+                for (const key in r.headers) {
+                    res.setHeader(key, r.headers[key]);
+                }
+                res.send(r.data);
             });
             return;
         }
