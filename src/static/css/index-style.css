@@ -25,6 +25,10 @@ h1 {
     color: var(--primary-color);
 }
 
+a {
+    color: var(--primary-color);
+}
+
 input, button {
     padding: 0.5rem;
     border-radius: 0.5rem;
@@ -48,7 +52,7 @@ form {
     display: flex;
     flex-direction: row;
     gap: 0.22rem;
-    margin: 1rem 0;
+    margin: 2rem 0;
 }
 
 form.logreg {
