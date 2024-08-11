@@ -1,4 +1,5 @@
 const form_el = document.querySelector("form");
+const input_el = document.getElementById("subdomain");
 const subdomains_el = document.getElementById("subdomains");
 const error_el = document.getElementById("error");
 
@@ -88,7 +89,13 @@ form_el.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     if (form_el.checkValidity() === false) {
-        error_el.innerText = "Missing subdomain";
+        error_el.innerText = "You must provide a subdomain";
+        form_el.reportValidity();
+        return;
+    }
+
+    if (input_el.value.length < 6) {
+        error_el.innerText = "Subdomain must be at least 6 characters long";
         form_el.reportValidity();
         return;
     }
@@ -110,6 +117,8 @@ form_el.addEventListener("submit", async (event) => {
         return;
     }
     error_el.innerText = "";
+
+    input_el.value = "";
 
     add_sd_el(data.id, data.token);
 });

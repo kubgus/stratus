@@ -4,16 +4,21 @@
     <title>Stratus</title>
     <script src="/static/js/index-script.js" defer></script>
     <link rel="stylesheet" href="/static/css/index-style.css">
+    <style>
+        #error {
+            color: red;
+        }
+    </style>
 </head>
 <body>
     <h1>Stratus</h1>
 
-    <span id="error"></span>
-
     <form>
         <input type="text" name="subdomain" id="subdomain" placeholder="New subdomain">
         <input type="submit" value="Add">
+        <span id="error"></span>
     </form>
+
 
     <div id="subdomains-container">
         <h2>Active Subdomains</h2>
